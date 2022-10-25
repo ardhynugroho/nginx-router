@@ -45,6 +45,39 @@ else
 end
 ```
 
+## Using Redis AUTH
+
+Redis configuration defined using a ConfigMap. The `requirepass` parameter is defined.
+
+```
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis
+data:
+  config: |
+    requirepass qwertyuiop
+```
+
+to verify the configuration
+
+```
+$ kubectl exec -it redis-5fcf574c5f-q56s7 -- cat /redis/redis.conf
+
+requirepass qwertyuiop
+```
+
+With AUTH enabled, following code must be defined as a step perform authentication
+
+```
+rewrite_by_lua_block {
+    ...
+    local ok, err = r:auth("qwertyuiop")
+    ...
+}
+```
+
 ## Usage
 
 1. Apply YAML files in this repo.
