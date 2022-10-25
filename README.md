@@ -67,7 +67,7 @@ end
     OK
     127.0.0.1:6379> 
     ```
-1. Testing using a test client
+1. Testing using a test client pod
 
     ```
     $ kubectl run client --rm -it --image=nicolaka/netshoot -- /bin/bash
@@ -78,3 +78,22 @@ end
     NEW BACKEND
     bash-5.1# 
     ```
+
+## Extra: Populating data using Python
+
+You can populate routing table data using Python. From test client pod, you can install Python Redis 
+
+```
+pip install redis
+```
+
+Then create new file and paste below code
+
+```
+import redis
+r = redis.Redis("redis.default.svc.cluster.local", 6379)
+r.auth("qwertyuiop")
+
+r.set("c1", "old-be")
+r.set("c2", "new-be")
+```
