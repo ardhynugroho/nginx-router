@@ -72,9 +72,9 @@ end
     ```
     $ kubectl run client --rm -it --image=nicolaka/netshoot -- /bin/bash
     If you don't see a command prompt, try pressing enter.
-    bash-5.1# curl http://nginx:5000/?id=c1
+    bash-5.1# curl http://router:5000/?id=c1
     OLD BACKEND
-    bash-5.1# curl http://nginx:5000/?id=c2
+    bash-5.1# curl http://router:5000/?id=c2
     NEW BACKEND
     bash-5.1# 
     ```
