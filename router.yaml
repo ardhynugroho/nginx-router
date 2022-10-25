@@ -48,7 +48,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nginx-conf
+  name: router-conf
 data:
   config: |
     lua_package_path "/opt/bitnami/openresty/lualib/resty/?.lua;;";
@@ -88,3 +88,4 @@ data:
         }
         proxy_pass http://$be;
       }
+    }

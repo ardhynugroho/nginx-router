@@ -10,10 +10,14 @@ Subscriber-id is populated to a Redis key-value server. This information used by
 
 ```
                       Redis
-                        |     +---- new backend
-                        |     |
-Subs ---[subs-id] --- NGINX --+
-                              |
-                              +---- old backend
+                        |      +---- new backend
+                        |      |
+Subs ---[subs-id] --- Router --+
+                               |
+                               +---- old backend
 
 ```
+
+## Route decision
+
+Subscriber id and assigned backend map is populated in Redis. Subscriber id will be extracted from HTTP request each time
