@@ -1,0 +1,64 @@
+# redis pod
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: redis
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7.0.5-alpine
+          command:
+            - redis-server
+            - /redis/redis.conf
+          volumeMounts:
+            - name: data
+              mountPath: /redis-data
+            - name: config
+              mountPath: /redis
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: redis
+            items:
+              - key: config
+                path: redis.conf
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: redis
+  name: redis
+spec:
+  ports:
+  - name: "redis"
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    app: redis
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis
+data:
+  config: |
+    requirepass qwertyuiop

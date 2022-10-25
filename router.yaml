@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: bitnami/openresty
+          volumeMounts:
+            - name: config
+              mountPath: /opt/bitnami/openresty/nginx/conf/server_blocks/
+      volumes:
+        - name: config
+          configMap:
+            name: router-conf
+            items:
+              - key: config
+                path: router.conf
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx
+  name: nginx
+spec:
+  ports:
+    - name: "router"
+      port: 5000
+      protocol: TCP
+      targetPort: 5000
+  selector:
+    app: nginx
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+data:
+  config: |
+    lua_package_path "/opt/bitnami/openresty/lualib/resty/?.lua;;";
+    resolver kube-dns.kube-system.svc.cluster.local valid=5s;
+    upstream old-be {
+      server old-be.default.svc.cluster.local:8000;
+    }
+    upstream new-be {
+      server new-be.default.svc.cluster.local:8000;
+    }
+    server {
+      listen 5000;
+      location / {
+        set $be "";
+        rewrite_by_lua_block {
+          local args = ngx.req.get_uri_args()
+          local subsid = args["id"]
+          local redis = require "redis"
+          local r = redis:new()
+
+          -- connect to redis server
+          local ok, err = r:connect("redis.default.svc.cluster.local", 6379)
+          if ok then
+
+            -- do authentication
+            local ok, err = r:auth("qwertyuiop")
+            
+            if ok then
+              local be, err = r:get(subsid)
+              if be == ngx.null then
+                ngx.say("no backend set")
+              else
+                ngx.var.be = be
+              end
+            end
+          end
+        }
+        proxy_pass http://$be;
+      }

@@ -1,0 +1,125 @@
+# OLD BACKEND
+#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: old-be
+  name: old-be
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: old-be
+  template:
+    metadata:
+      labels:
+        app: old-be
+    spec:
+      containers:
+        - name: ngx
+          image: bitnami/openresty
+          volumeMounts:
+            - name: config
+              mountPath: /opt/bitnami/openresty/nginx/conf/server_blocks/
+      volumes:
+        - name: config
+          configMap:
+            name: old-be
+            items:
+              - key: config
+                path: ngx.conf
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: old-be
+  name: old-be
+spec:
+  ports:
+  - name: "backend"
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: old-be
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: old-be
+data: 
+  config: |
+    server {
+      listen 8000;
+      location / {
+        return 200 "OLD BACKEND\n";
+      }
+    }
+
+# NEW BACKEND
+#
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: new-be
+  name: new-be
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: new-be
+  template:
+    metadata:
+      labels:
+        app: new-be
+    spec:
+      containers:
+        - name: ngx
+          image: bitnami/openresty
+          volumeMounts:
+            - name: config
+              mountPath: /opt/bitnami/openresty/nginx/conf/server_blocks/
+      volumes:
+        - name: config
+          configMap:
+            name: new-be
+            items:
+              - key: config
+                path: ngx.conf
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: new-be
+  name: new-be
+spec:
+  ports:
+  - name: "backend"
+    port: 8000
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app: new-be
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: new-be
+data: 
+  config: |
+    server {
+      listen 8000;
+      location / {
+        return 200 "NEW BACKEND\n";
+      }
+    }
