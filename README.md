@@ -4,14 +4,13 @@
 
 Example of NGINX router implementation serving per-subscriber traffic migration to a new system. 
 
-```
-                          Redis
-                            |        +---- new backend
-                            |        |
-Subs -----[subs-id] ----- Router ----|
-                                     |
-                                     +---- old backend
-
+```mermaid
+graph TD
+  A[Subs] --> |1. subs-id| B[Router]
+  B --> |2. subs-id| C[Redis]
+  C --> |3. backend-name| B
+  B --> D[New Backend]
+  B --> E[Old Backend]
 ```
 
 A routing table consist of subscriber id and backend server map is populated in Redis. This information used by NGINX to do routing decision. Below is the example route table.
