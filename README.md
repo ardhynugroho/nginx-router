@@ -5,10 +5,10 @@
 Example of NGINX router implementation serving per-subscriber traffic migration to a new system. 
 
 ```mermaid
-graph TD
-  A[Subs] --> |1. subs-id| B[Router]
-  B --> |2. subs-id| C[Redis]
-  C --> |3. backend-name| B
+flowchart LR
+  A[Subscriber] --> |1. subs-id| B[Router]
+  B -.-> |2. subs-id| C[Redis]
+  C -.-> |3. backend-name| B
   B --> D[New Backend]
   B --> E[Old Backend]
 ```
