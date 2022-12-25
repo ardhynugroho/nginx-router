@@ -27,14 +27,14 @@ The `id` column is the key, and the `backend` column is the value of the key-val
 Subscriber id is extracted from HTTP request, for example URI: `http://router/?id=c1`, the `c1` value is extracted from `id` parameter.
 Below is example code using Lua.
 
-```
+```lua
 local args = ngx.req.get_uri_args()
 local subsid = args["id"]
 ```
 
 Then the `c1` value is used to lookup backend server in routing table in Redis. The value returned is match to upstream server configuration in the router.
 
-```
+```lua
 local be, err = r:get(subsid)
 
 if be == ngx.null then
@@ -48,7 +48,7 @@ end
 
 Redis configuration defined using a ConfigMap. The `requirepass` parameter is defined.
 
-```
+```yaml
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -61,7 +61,7 @@ data:
 
 to verify the configuration
 
-```
+```bash
 $ kubectl exec -it redis-5fcf574c5f-q56s7 -- cat /redis/redis.conf
 
 requirepass qwertyuiop
@@ -69,7 +69,7 @@ requirepass qwertyuiop
 
 With AUTH enabled, following code must be defined as a step perform authentication
 
-```
+```lua
 rewrite_by_lua_block {
     ...
     local ok, err = r:auth("qwertyuiop")
@@ -80,14 +80,16 @@ rewrite_by_lua_block {
 ## Usage
 
 1. Apply YAML files in this repo.
-    ```
+
+    ```bash
     kubectl apply -f router.yaml
     kubectl apply -f redis.yaml
     kubectl apply -f backends.yaml
     ```
+
 1. Use `redis-cli` inside the Redis pod to populate sampe data
     
-    ```
+    ```bash
     $ kubectl exec -it redis-5fcf574c5f-4xp2z -- sh
     
     /data # redis-cli
@@ -99,9 +101,10 @@ rewrite_by_lua_block {
     OK
     127.0.0.1:6379> 
     ```
+    
 1. Testing using a test client pod
 
-    ```
+    ```bash
     $ kubectl run client --rm -it --image=nicolaka/netshoot -- /bin/bash
     If you don't see a command prompt, try pressing enter.
     bash-5.1# curl http://router:5000/?id=c1
@@ -115,13 +118,13 @@ rewrite_by_lua_block {
 
 You can populate routing table data using Python. From test client pod, you can install Python Redis 
 
-```
+```bash
 pip install redis
 ```
 
 Then create new file and paste below code
 
-```
+```python
 import redis
 r = redis.Redis("redis.default.svc.cluster.local", 6379)
 r.auth("qwertyuiop")
