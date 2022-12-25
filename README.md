@@ -17,8 +17,8 @@ A routing table consist of subscriber id and backend server map is populated in 
 
 |id||backend|
 |-|-|-|
-|c1|-->|old-be|
-|c2|-->|new-be|
+|c1|&rarr;|old-be|
+|c2|&rarr;|new-be|
 
 The `id` column is the key, and the `backend` column is the value of the key-value pair.
 
