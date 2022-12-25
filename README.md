@@ -6,7 +6,7 @@ Example of NGINX router implementation serving per-subscriber traffic migration 
 
 ```mermaid
 flowchart LR
-  A[Subscriber] --> |1. subs-id| B[Router]
+  A[Subscriber] --> |1. subs-id| B((NGINX<br>Router))
   B -.-> |2. subs-id| C[Redis]
   C -.-> |3. backend-name| B
   B --> D[New Backend]
